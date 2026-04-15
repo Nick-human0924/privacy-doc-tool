@@ -483,9 +483,9 @@ function openTool(toolId) {
   const pIcon = document.getElementById('toolPanelIcon');
   if (pIcon) pIcon.textContent = icons[toolId] || '📂';
   const pTitle = document.getElementById('toolPanelTitle');
-  if (pName) pTitle.textContent = toolNames[toolId] || toolId;
+  pTitle.textContent = toolNames[toolId] || toolId;
   const pDesc = document.getElementById('toolPanelDesc');
-  if (pSub) pDesc.textContent = toolSubs[toolId] || '';
+  pDesc.textContent = toolSubs[toolId] || '';
 
   document.getElementById('uploadTitle').textContent = t('u.' + toolId) || '拖拽文件到这里，或点击上传';
   updateProcessBtn();
