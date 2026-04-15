@@ -577,7 +577,7 @@
 <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/privacy-doc-tool/sw.js").catch(() => {});
+    navigator.serviceWorker.register("sw.js").catch(() => {});
   });
 }
 </script>
@@ -626,7 +626,8 @@ function closePrivacyModal() {
   document.getElementById('privacyModal').style.display = 'none';
   document.body.style.overflow = '';
 }
+window.openModal = openModal;
+window.closePrivacyModal = closePrivacyModal;
 </script>
 </body>
 </html>
-
