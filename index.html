@@ -574,10 +574,10 @@
 <div id="toast" style="position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--bg-dark); color: var(--text-inverse); padding: 14px 24px; border-radius: var(--radius-md); font-size: 14px; font-weight: 500; z-index: 400; opacity: 0; transition: all 0.3s var(--ease-out); pointer-events: none; white-space: nowrap;"></div>
 
 <script src="js/main.js"></script>
-<script type="module">
+<script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => {});
+    navigator.serviceWorker.register("sw.js").catch(() => {});
   });
 }
 </script>
