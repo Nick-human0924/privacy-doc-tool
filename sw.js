@@ -1,9 +1,8 @@
-const CACHE_NAME = 'securedocs-v1';
+const CACHE_NAME = 'securedocs-v2';
 const ASSETS = [
   './index.html',
   './js/main.js',
   './css/design-system.css',
-  'https://cdn.jsdelivr.net/npm/pdf-lib@3.1.6/+esm',
 ];
 
 self.addEventListener('install', e => {
@@ -21,15 +20,14 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  if (e.request.url.startsWith('http') && !e.request.url.includes('cdn.jsdelivr')) {
-    e.respondWith(
-      caches.match(e.request).then(r => r || fetch(e.request).then(res => {
-        if (res.ok) {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
-        }
-        return res;
-      }))
-    );
-  }
+  if (!e.request.url.startsWith('http')) return;
+  e.respondWith(
+    caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+      if (res.ok) {
+        const clone = res.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+      }
+      return res;
+    }))
+  );
 });
