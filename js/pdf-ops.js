@@ -4,7 +4,7 @@
  * File content never leaves the browser for these operations.
  */
 
-import { PDFDocument, rgb, degrees, StandardFonts } from 'https://cdn.jsdelivr.net/npm/pdf-lib@3.1.1/+esm';
+import { PDFDocument, rgb, degrees, StandardFonts } from 'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/+esm';
 
 // ─── PDF Merge ──────────────────────────────────────────────
 export async function mergePDFs(files) {
