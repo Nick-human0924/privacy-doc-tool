@@ -1066,13 +1066,21 @@ updateNavCredits();
 // Expose key functions to global scope for HTML onclick handlers
 window.openTool = openTool;
 window.closeTool = closeTool;
-window.toggleLang = toggleLang;
-window.switchLang = switchLang;
+window.toggleLang = setLang;
+window.switchLang = setLang;
 window.toggleFaq = toggleFaq;
 window.openModal = openModal;
 window.closeModal = closeModal;
 window.handleFileSelect = handleFileSelect;
-window.handleDrop = handleDrop;
+window.handleDrop = handleFileSelect;
 window.updateProcessBtn = updateProcessBtn;
+// downloadResult: trigger download from current state (used as onclick handler)
+function downloadResult() {
+  if (!state.blobs || !state.blobs.length) return;
+  const base = toolNames[state.tool] || state.tool || 'result';
+  const extMap = {'pdf-word':'.docx','word-pdf':'.pdf','img-pdf':'.pdf','ocr':'.txt'};
+  downloadBlobs(state.blobs, base, extMap[state.tool] || '.pdf');
+}
+
 window.downloadResult = downloadResult;
 
