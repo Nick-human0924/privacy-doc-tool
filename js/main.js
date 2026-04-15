@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => setLang(currentLang));
  */
 
 // ES Module imports from CDN
-import { PDFDocument, rgb, degrees, StandardFonts } from 'https://cdn.jsdelivr.net/npm/pdf-lib@3.1.6/+esm';
+import { PDFDocument, rgb, degrees, StandardFonts } from 'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/+esm';
 
 // ─── State ─────────────────────────────────────────────────
 function formatSize(bytes) { if(bytes<1024) return bytes+' B'; if(bytes<1048576) return (bytes/1024).toFixed(1)+' KB'; return (bytes/1048576).toFixed(1)+' MB'; }
