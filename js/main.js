@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => setLang(currentLang));
  */
 
 // ES Module imports from CDN
-import { PDFDocument, rgb, degrees, StandardFonts } from 'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/+esm';
+import { PDFDocument, rgb, degrees, StandardFonts } from 'https://cdn.jsdelivr.net/npm/pdf-lib@3.1.6/+esm';
 
 // ─── State ─────────────────────────────────────────────────
 function formatSize(bytes) { if(bytes<1024) return bytes+' B'; if(bytes<1048576) return (bytes/1024).toFixed(1)+' KB'; return (bytes/1048576).toFixed(1)+' MB'; }
@@ -1074,13 +1074,12 @@ window.closeModal = closeModal;
 window.handleFileSelect = handleFileSelect;
 window.handleDrop = handleFileSelect;
 window.updateProcessBtn = updateProcessBtn;
-// downloadResult: trigger download from current state (used as onclick handler)
+// downloadResult: trigger download from current state
 function downloadResult() {
   if (!state.blobs || !state.blobs.length) return;
   const base = toolNames[state.tool] || state.tool || 'result';
   const extMap = {'pdf-word':'.docx','word-pdf':'.pdf','img-pdf':'.pdf','ocr':'.txt'};
   downloadBlobs(state.blobs, base, extMap[state.tool] || '.pdf');
 }
-
 window.downloadResult = downloadResult;
 
