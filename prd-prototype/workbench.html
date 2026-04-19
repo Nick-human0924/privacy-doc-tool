@@ -8,48 +8,78 @@
     <link rel="stylesheet" href="./workbench.css">
   </head>
   <body>
-    <header class="top">
-      <a class="brand" href="#workspace">
-        <span class="mark">LD</span>
-        <span><strong>LocalDoc Safe</strong><small>本地隐私文档处理</small></span>
+    <header class="topbar">
+      <a class="brand" href="#home" aria-label="LocalDoc Safe 首页">
+        <span class="brandMark">LD</span>
+        <span>
+          <strong>LocalDoc Safe</strong>
+          <small>本地隐私文档处理</small>
+        </span>
       </a>
-      <nav>
+      <nav class="nav">
         <a href="#workspace">工作台</a>
-        <a href="#capabilities">能力边界</a>
-        <a href="#trust">安全说明</a>
+        <a href="#tools">功能</a>
+        <a href="#pricing">价格</a>
+        <a href="#privacy">隐私</a>
+        <a href="#roadmap">限制</a>
       </nav>
+      <a class="topAction" href="#workspace">开始处理</a>
     </header>
 
-    <main>
-      <section class="hero" id="trust">
-        <div>
-          <p class="eyebrow">本地优先 · 可验证结果 · 不把文件交给服务器</p>
-          <h1>处理敏感文件时，页面应该先让人放心。</h1>
-          <p class="introText">这个工具优先把能在浏览器内可靠完成的 PDF 和图片处理做实。所有文件读取、页面渲染、涂黑、合并和导出都发生在当前浏览器会话中。</p>
-          <div class="trustList">
-            <div class="trustItem"><span class="dot"></span><div><strong>不上传文件</strong><span>页面没有文件上传接口，处理过程使用浏览器内存和本地下载。</span></div></div>
-            <div class="trustItem"><span class="dot"></span><div><strong>结果可检查</strong><span>涂黑导出会栅格化页面，避免保留原文字层或隐藏遮罩。</span></div></div>
-            <div class="trustItem"><span class="dot"></span><div><strong>边界明确</strong><span>PDF 转 Word、Office 转 PDF、OCR 自动识别不会伪装成已完成能力。</span></div></div>
+    <main id="home">
+      <section class="hero">
+        <div class="heroCopy">
+          <p class="eyebrow">Local first · Browser only · Result verifiable</p>
+          <h1>敏感文件处理，先把文件留在你手里。</h1>
+          <p class="lead">面向合同、证件、报销材料、内部资料的本地文档工作台。能在浏览器内完成的功能就直接本地执行，暂时不能可靠完成的功能明确标注，不用演示效果冒充真实能力。</p>
+          <div class="heroActions">
+            <a class="primaryLink" href="#workspace">打开工作台</a>
+            <a class="secondaryLink" href="#privacy">查看隐私说明</a>
+          </div>
+          <div class="proofStrip" aria-label="安全承诺">
+            <span>无文件上传接口</span>
+            <span>关闭页面即清空会话</span>
+            <span>涂黑结果可下载核验</span>
           </div>
         </div>
-        <aside class="audit">
-          <h2>当前执行方式</h2>
-          <div class="auditGrid">
-            <div class="metric"><strong>0</strong><span>服务器上传步骤</span></div>
-            <div class="metric"><strong>本地</strong><span>PDF 读写与渲染</span></div>
-            <div class="metric"><strong>可视化</strong><span>手动画框涂黑</span></div>
-            <div class="metric"><strong>明确</strong><span>不可做能力标注限制</span></div>
+        <aside class="heroPanel" aria-label="执行方式概览">
+          <div class="statusCard strong">
+            <span class="statusLabel">当前版本</span>
+            <strong>浏览器本地执行</strong>
+            <p>PDF 读写、页面渲染、图片打包、手动画框涂黑都发生在当前浏览器会话。</p>
+          </div>
+          <div class="statusGrid">
+            <div><strong>10</strong><span>个可测试工具</span></div>
+            <div><strong>0</strong><span>文件上传步骤</span></div>
+            <div><strong>PDF.js</strong><span>页面预览</span></div>
+            <div><strong>pdf-lib</strong><span>PDF 导出</span></div>
           </div>
         </aside>
       </section>
 
-      <section class="workspace" id="workspace">
-        <aside class="panel">
-          <h2>工作台</h2>
-          <p class="hint">选择功能、添加文件，然后执行。涂黑功能会打开页面预览和画框工具。</p>
-          <div class="controlStack">
-            <label>
-              选择功能
+      <section class="trustBand" id="privacy">
+        <div>
+          <p class="eyebrow">隐私不是一句口号</p>
+          <h2>页面需要让用户知道文件去了哪里，也要知道哪里还不能做。</h2>
+        </div>
+        <div class="trustGrid">
+          <article><strong>文件不离开浏览器</strong><p>当前静态版本没有上传接口，文件通过 File API 读入浏览器内存，处理完成后由浏览器生成下载。</p></article>
+          <article><strong>涂黑不是盖一层遮罩</strong><p>可视化涂黑会先渲染页面，再写入黑块并栅格化输出，避免原文字层被复制出来。</p></article>
+          <article><strong>能力边界直接展示</strong><p>PDF 转 Word、Office 转 PDF、OCR 自动识别需要转换引擎，当前不会伪装成已完成。</p></article>
+        </div>
+      </section>
+
+      <section class="workspaceSection" id="workspace">
+        <div class="sectionHead">
+          <p class="eyebrow">工作台</p>
+          <h2>选择功能，上传本地文件，直接得到结果。</h2>
+          <p>下面的工具优先覆盖 PRD 的 MVP 文档处理链路。所有可执行项都会真正生成文件，不能执行的项会给出明确原因。</p>
+        </div>
+
+        <div class="workspace">
+          <aside class="controlPanel">
+            <div class="panelTitle"><h3>处理设置</h3><span id="localBadge">本地会话</span></div>
+            <label>功能
               <select id="tool">
                 <option value="merge">PDF 合并</option>
                 <option value="split">PDF 拆分</option>
@@ -61,103 +91,49 @@
                 <option value="pdfimages">PDF 转图片 ZIP</option>
                 <option value="compress">PDF 压缩（有限）</option>
                 <option value="redact">PDF 可视化涂黑</option>
-                <option value="pdf2word">PDF 转 Word（需转换引擎）</option>
-                <option value="office2pdf">Word/PPT 转 PDF（需转换引擎）</option>
+                <option value="pdf2word">PDF 转 Word（需要转换引擎）</option>
+                <option value="office2pdf">Word/PPT 转 PDF（需要转换引擎）</option>
               </select>
             </label>
-            <label class="drop" for="fileInput">
+            <label class="dropZone drop" for="fileInput">
               <input id="fileInput" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx,.ppt,.pptx,application/pdf">
-              <span><b>选择或拖入文件</b><span id="acceptText">当前功能需要 PDF 文件。</span></span>
+              <span><b>选择文件或拖入这里</b><small id="acceptText">当前功能需要 PDF 文件。</small></span>
             </label>
-            <div class="fileList" id="fileList"><p class="hint">还没有选择文件。</p></div>
-            <div class="buttonRow">
-              <button class="primary" id="runBtn" type="button">开始处理</button>
-              <button class="secondary" id="clearBtn" type="button">清空</button>
-            </div>
-          </div>
-        </aside>
-
-        <section class="stage">
-          <div class="stageHead">
-            <div>
-              <p class="eyebrow">当前功能</p>
-              <h2 id="activeTool">PDF 合并</h2>
-            </div>
-            <span class="notice" id="toolNotice">将多个 PDF 合并为一个新 PDF。</span>
-          </div>
-          <div class="stageBody">
+            <div class="fileList" id="fileList"><p class="emptyLine">还没有选择文件。</p></div>
             <div class="settings" id="settings">
-              <label id="rangeWrap">
-                页码 / 顺序
-                <input id="rangeInput" placeholder="例如 1-3,5 或 3,1,2">
-              </label>
-              <label id="watermarkWrap">
-                水印文字
-                <input id="watermarkInput" value="Confidential">
-              </label>
-              <label id="angleWrap">
-                旋转角度
-                <select id="angleInput">
-                  <option value="90">顺时针 90 度</option>
-                  <option value="180">180 度</option>
-                  <option value="270">逆时针 90 度</option>
-                </select>
-              </label>
+              <label id="rangeWrap">页码 / 顺序<input id="rangeInput" placeholder="例如 1-3,5 或 3,1,2"><small id="rangeHelp">拆分多个文件时用分号分隔，例如 1-2;3-5。</small></label>
+              <label id="watermarkWrap">水印文字<input id="watermarkInput" value="Confidential"></label>
+              <label id="angleWrap">旋转角度<select id="angleInput"><option value="90">顺时针 90 度</option><option value="180">180 度</option><option value="270">逆时针 90 度</option></select></label>
             </div>
+            <div class="buttonRow"><button class="primaryButton primary" id="runBtn" type="button">开始处理</button><button class="secondaryButton secondary" id="clearBtn" type="button">清空</button></div>
+          </aside>
 
+          <section class="stage" aria-live="polite">
+            <div class="stageHeader stageHead"><div><p class="eyebrow">当前功能</p><h3 id="activeTool">PDF 合并</h3></div><span class="notice" id="toolNotice">将多个 PDF 合并为一个新 PDF。</span></div>
             <div class="redactStudio" id="redactStudio">
-              <div class="studioTools">
-                <button class="toolBtn active" id="rectTool" type="button">矩形涂黑</button>
-                <button class="toolBtn" id="panTool" type="button">浏览模式</button>
-                <select id="zoomInput" aria-label="预览缩放">
-                  <option value="1.25">125%</option>
-                  <option value="1.5" selected>150%</option>
-                  <option value="2">200%</option>
-                  <option value="2.5">250%</option>
-                </select>
-                <button class="secondary" id="prevPage" type="button">上一页</button>
-                <strong id="pageLabel">第 0 页 / 共 0 页</strong>
-                <button class="secondary" id="nextPage" type="button">下一页</button>
-                <button class="secondary" id="undoBtn" type="button">撤销上一框</button>
-                <button class="secondary" id="clearPageBtn" type="button">清空本页</button>
-                <button class="secondary" id="clearAllBtn" type="button">清空全部</button>
+              <div class="studioToolbar studioTools">
+                <button class="toolButton toolBtn active" id="rectTool" type="button">矩形涂黑</button>
+                <button class="toolButton toolBtn" id="panTool" type="button">浏览模式</button>
+                <label class="compactLabel">缩放<select id="zoomInput" aria-label="预览缩放"><option value="1.25">125%</option><option value="1.5" selected>150%</option><option value="2">200%</option><option value="2.5">250%</option></select></label>
+                <button class="secondaryButton secondary" id="prevPage" type="button">上一页</button><strong id="pageLabel">第 0 页 / 共 0 页</strong><button class="secondaryButton secondary" id="nextPage" type="button">下一页</button><button class="secondaryButton secondary" id="undoBtn" type="button">撤销上一区域</button><button class="secondaryButton secondary" id="clearPageBtn" type="button">清空本页</button><button class="secondaryButton secondary" id="clearAllBtn" type="button">清空全部</button>
               </div>
-              <p class="hint">预览只显示半透明选区。导出时会写入纯黑涂黑块并栅格化页面。</p>
-              <div class="viewer">
-                <div class="viewerHead">
-                  <strong id="viewerTitle">PDF 预览</strong>
-                  <span class="hint" id="rectCount">已画 0 个涂黑区域</span>
-                </div>
-                <div class="emptyState" id="emptyState">选择 1 个 PDF 后，这里会显示页面预览。</div>
-                <div class="canvasShell hidden" id="canvasShell">
-                  <div class="canvasStack" id="canvasStack">
-                    <canvas id="pdfCanvas"></canvas>
-                    <canvas id="overlayCanvas"></canvas>
-                  </div>
-                </div>
-              </div>
+              <p class="helperText">预览里显示半透明选区；导出时写入纯黑涂黑块，并将页面栅格化为新 PDF。</p>
+              <div class="viewer"><div class="viewerHeader viewerHead"><strong id="viewerTitle">PDF 预览</strong><span id="rectCount">已画 0 个涂黑区域</span></div><div class="emptyState" id="emptyState">选择 1 个 PDF 后，这里会显示页面预览。</div><div class="canvasShell hidden" id="canvasShell"><div class="canvasStack" id="canvasStack"><canvas id="pdfCanvas"></canvas><canvas id="overlayCanvas"></canvas></div></div></div>
             </div>
-
-            <div class="progress" id="progress">
-              <div class="progressHead"><span id="progressText">准备中</span><span id="progressNumber">0%</span></div>
-              <div class="track"><span id="progressBar"></span></div>
-            </div>
+            <div class="progress" id="progress"><div class="progressHeader progressHead"><span id="progressText">准备中</span><span id="progressNumber">0%</span></div><div class="track"><span id="progressBar"></span></div></div>
             <div class="results" id="results"></div>
-          </div>
-        </section>
-      </section>
-
-      <section class="section" id="capabilities">
-        <h2>能力边界</h2>
-        <div class="capabilityGrid">
-          <article class="capability"><h3>已实现</h3><p>合并、拆分、删除、提取重排、旋转、水印、图片转 PDF、PDF 转图片。</p></article>
-          <article class="capability"><h3>可视化涂黑</h3><p>手动画框，导出时栅格化页面，避免保留原文字层。</p></article>
-          <article class="capability"><h3>有限实现</h3><p>PDF 压缩仅重写对象流，不承诺图片型 PDF 明显变小。</p></article>
-          <article class="capability"><h3>未伪装</h3><p>PDF 转 Word、Office 转 PDF、OCR 自动识别需要转换引擎。</p></article>
+          </section>
         </div>
       </section>
+
+      <section class="toolSection" id="tools"><div class="sectionHead"><p class="eyebrow">功能矩阵</p><h2>把可落地的先做实，把需要引擎的单独规划。</h2></div><div class="toolGrid"><article><span>已实现</span><h3>PDF 页面处理</h3><p>合并、拆分、删除、提取、重排、旋转。</p></article><article><span>已实现</span><h3>图片与导出</h3><p>图片转 PDF、PDF 转图片 ZIP、水印输出。</p></article><article><span>已实现</span><h3>可视化涂黑</h3><p>画框、翻页、缩放、撤销、清空、栅格化导出。</p></article><article><span>有限实现</span><h3>PDF 压缩</h3><p>重写对象流，不承诺扫描件明显变小。</p></article><article><span>待接引擎</span><h3>PDF 转 Word</h3><p>需要版面识别和转换引擎。</p></article><article><span>待接引擎</span><h3>Office 转 PDF</h3><p>需要 LibreOffice、桌面端或后端转换服务。</p></article></div></section>
+
+      <section class="pricing" id="pricing"><div class="sectionHead"><p class="eyebrow">商业化草案</p><h2>先给用户可测试的免费版本，再为高成本能力收费。</h2></div><div class="priceGrid"><article><h3>免费本地版</h3><strong>¥0</strong><p>适合验证基础 PDF 和图片处理。</p><ul><li>浏览器本地处理</li><li>基础 PDF 工具</li><li>可视化手动涂黑</li></ul></article><article class="featured"><h3>专业版</h3><strong>待定</strong><p>适合真实工作流和高频处理。</p><ul><li>批量任务队列</li><li>OCR 与自动识别</li><li>转换引擎能力</li></ul></article><article><h3>团队版</h3><strong>待定</strong><p>适合企业内部合规和协作。</p><ul><li>账号与额度管理</li><li>本地部署方案</li><li>审计与配置策略</li></ul></article></div></section>
+
+      <section class="roadmap" id="roadmap"><div class="sectionHead"><p class="eyebrow">下一阶段</p><h2>完整 PRD 需要后端或本地客户端配合。</h2></div><div class="roadmapGrid"><article><h3>账户与额度</h3><p>注册、登录、免费次数、支付状态都需要后端持久化，不能只靠静态页面。</p></article><article><h3>转换引擎</h3><p>PDF 转 Word、Office 转 PDF、OCR 自动识别需要 WebAssembly、桌面端或服务端引擎。</p></article><article><h3>生产部署</h3><p>收费版本建议拆成前端、任务引擎、账户支付、隐私审计四层，避免后期推倒重做。</p></article></div></section>
     </main>
 
+    <footer class="footer"><strong>LocalDoc Safe</strong><span>文件留在本地，结果自己验证。</span></footer>
     <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
