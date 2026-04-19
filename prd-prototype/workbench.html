@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LocalDoc Safe - 本地隐私文档处理</title>
+    <meta name="description" content="文件留在浏览器内处理的本地隐私文档工具。">
+    <link rel="stylesheet" href="./workbench.css">
+  </head>
+  <body>
+    <header class="top">
+      <a class="brand" href="#workspace">
+        <span class="mark">LD</span>
+        <span><strong>LocalDoc Safe</strong><small>本地隐私文档处理</small></span>
+      </a>
+      <nav>
+        <a href="#workspace">工作台</a>
+        <a href="#capabilities">能力边界</a>
+        <a href="#trust">安全说明</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" id="trust">
+        <div>
+          <p class="eyebrow">本地优先 · 可验证结果 · 不把文件交给服务器</p>
+          <h1>处理敏感文件时，页面应该先让人放心。</h1>
+          <p class="introText">这个工具优先把能在浏览器内可靠完成的 PDF 和图片处理做实。所有文件读取、页面渲染、涂黑、合并和导出都发生在当前浏览器会话中。</p>
+          <div class="trustList">
+            <div class="trustItem"><span class="dot"></span><div><strong>不上传文件</strong><span>页面没有文件上传接口，处理过程使用浏览器内存和本地下载。</span></div></div>
+            <div class="trustItem"><span class="dot"></span><div><strong>结果可检查</strong><span>涂黑导出会栅格化页面，避免保留原文字层或隐藏遮罩。</span></div></div>
+            <div class="trustItem"><span class="dot"></span><div><strong>边界明确</strong><span>PDF 转 Word、Office 转 PDF、OCR 自动识别不会伪装成已完成能力。</span></div></div>
+          </div>
+        </div>
+        <aside class="audit">
+          <h2>当前执行方式</h2>
+          <div class="auditGrid">
+            <div class="metric"><strong>0</strong><span>服务器上传步骤</span></div>
+            <div class="metric"><strong>本地</strong><span>PDF 读写与渲染</span></div>
+            <div class="metric"><strong>可视化</strong><span>手动画框涂黑</span></div>
+            <div class="metric"><strong>明确</strong><span>不可做能力标注限制</span></div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="workspace" id="workspace">
+        <aside class="panel">
+          <h2>工作台</h2>
+          <p class="hint">选择功能、添加文件，然后执行。涂黑功能会打开页面预览和画框工具。</p>
+          <div class="controlStack">
+            <label>
+              选择功能
+              <select id="tool">
+                <option value="merge">PDF 合并</option>
+                <option value="split">PDF 拆分</option>
+                <option value="delete">删除指定页面</option>
+                <option value="extract">页面提取 / 重排</option>
+                <option value="rotate">PDF 页面旋转</option>
+                <option value="watermark">PDF 加水印</option>
+                <option value="images">图片转 PDF</option>
+                <option value="pdfimages">PDF 转图片 ZIP</option>
+                <option value="compress">PDF 压缩（有限）</option>
+                <option value="redact">PDF 可视化涂黑</option>
+                <option value="pdf2word">PDF 转 Word（需转换引擎）</option>
+                <option value="office2pdf">Word/PPT 转 PDF（需转换引擎）</option>
+              </select>
+            </label>
+            <label class="drop" for="fileInput">
+              <input id="fileInput" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx,.ppt,.pptx,application/pdf">
+              <span><b>选择或拖入文件</b><span id="acceptText">当前功能需要 PDF 文件。</span></span>
+            </label>
+            <div class="fileList" id="fileList"><p class="hint">还没有选择文件。</p></div>
+            <div class="buttonRow">
+              <button class="primary" id="runBtn" type="button">开始处理</button>
+              <button class="secondary" id="clearBtn" type="button">清空</button>
+            </div>
+          </div>
+        </aside>
+
+        <section class="stage">
+          <div class="stageHead">
+            <div>
+              <p class="eyebrow">当前功能</p>
+              <h2 id="activeTool">PDF 合并</h2>
+            </div>
+            <span class="notice" id="toolNotice">将多个 PDF 合并为一个新 PDF。</span>
+          </div>
+          <div class="stageBody">
+            <div class="settings" id="settings">
+              <label id="rangeWrap">
+                页码 / 顺序
+                <input id="rangeInput" placeholder="例如 1-3,5 或 3,1,2">
+              </label>
+              <label id="watermarkWrap">
+                水印文字
+                <input id="watermarkInput" value="Confidential">
+              </label>
+              <label id="angleWrap">
+                旋转角度
+                <select id="angleInput">
+                  <option value="90">顺时针 90 度</option>
+                  <option value="180">180 度</option>
+                  <option value="270">逆时针 90 度</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="redactStudio" id="redactStudio">
+              <div class="studioTools">
+                <button class="toolBtn active" id="rectTool" type="button">矩形涂黑</button>
+                <button class="toolBtn" id="panTool" type="button">浏览模式</button>
+                <select id="zoomInput" aria-label="预览缩放">
+                  <option value="1.25">125%</option>
+                  <option value="1.5" selected>150%</option>
+                  <option value="2">200%</option>
+                  <option value="2.5">250%</option>
+                </select>
+                <button class="secondary" id="prevPage" type="button">上一页</button>
+                <strong id="pageLabel">第 0 页 / 共 0 页</strong>
+                <button class="secondary" id="nextPage" type="button">下一页</button>
+                <button class="secondary" id="undoBtn" type="button">撤销上一框</button>
+                <button class="secondary" id="clearPageBtn" type="button">清空本页</button>
+                <button class="secondary" id="clearAllBtn" type="button">清空全部</button>
+              </div>
+              <p class="hint">预览只显示半透明选区。导出时会写入纯黑涂黑块并栅格化页面。</p>
+              <div class="viewer">
+                <div class="viewerHead">
+                  <strong id="viewerTitle">PDF 预览</strong>
+                  <span class="hint" id="rectCount">已画 0 个涂黑区域</span>
+                </div>
+                <div class="emptyState" id="emptyState">选择 1 个 PDF 后，这里会显示页面预览。</div>
+                <div class="canvasShell hidden" id="canvasShell">
+                  <div class="canvasStack" id="canvasStack">
+                    <canvas id="pdfCanvas"></canvas>
+                    <canvas id="overlayCanvas"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="progress" id="progress">
+              <div class="progressHead"><span id="progressText">准备中</span><span id="progressNumber">0%</span></div>
+              <div class="track"><span id="progressBar"></span></div>
+            </div>
+            <div class="results" id="results"></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="section" id="capabilities">
+        <h2>能力边界</h2>
+        <div class="capabilityGrid">
+          <article class="capability"><h3>已实现</h3><p>合并、拆分、删除、提取重排、旋转、水印、图片转 PDF、PDF 转图片。</p></article>
+          <article class="capability"><h3>可视化涂黑</h3><p>手动画框，导出时栅格化页面，避免保留原文字层。</p></article>
+          <article class="capability"><h3>有限实现</h3><p>PDF 压缩仅重写对象流，不承诺图片型 PDF 明显变小。</p></article>
+          <article class="capability"><h3>未伪装</h3><p>PDF 转 Word、Office 转 PDF、OCR 自动识别需要转换引擎。</p></article>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="./workbench.js"></script>
+  </body>
+</html>
