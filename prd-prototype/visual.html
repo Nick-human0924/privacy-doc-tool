@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LocalDoc Safe - 可视化涂黑版</title>
+    <style>
+      html, body { margin: 0; min-height: 100%; background: #f5f8f7; }
+      iframe { display: block; width: 100%; min-height: 100vh; border: 0; }
+    </style>
+  </head>
+  <body>
+    <iframe id="appFrame" src="./v2.html" title="LocalDoc Safe"></iframe>
+    <script>
+      const frame = document.querySelector("#appFrame");
+
+      frame.addEventListener("load", () => {
+        const win = frame.contentWindow;
+        const doc = frame.contentDocument;
+        const $ = (selector) => doc.querySelector(selector);
+        const tool = $("#tool");
+        const fileInput = $("#fileInput");
+        const drop = doc.querySelector(".drop");
+        const runBtn = $("#runBtn");
+        const clearBtn = $("#clearBtn");
+        const results = $("#results");
+        const progress = $("#progress");
+        const progressText = $("#progressText");
+        const progressNumber = $("#progressNumber");
+        const progressBar = $("#progressBar");
+        const notice = $("#toolNotice");
+        const settings = doc.querySelector(".settings");
+        const oldRedactWrap = $("#redactWrap");
+        const rangeWrap = $("#rangeWrap");
+        const watermarkWrap = $("#watermarkWrap");
+        const angleWrap = $("#angleWrap");
+
+        if (!tool || doc.querySelector("#visualRedactEditor")) return;
+
+        injectStyle(doc);
+        const editor = doc.createElement("section");
+        editor.className = "visualRedactEditor";
+        editor.id = "visualRedactEditor";
+        editor.innerHTML = `
+          <div class="visualRedactToolbar">
+            <button class="secondary" id="visualPrevPage" type="button">上一页</button>
+            <strong id="visualPageLabel">第 1 页 / 共 1 页</strong>
+            <button class="secondary" id="visualNextPage" type="button">下一页</button>
+            <button class="secondary" id="visualUndo" type="button">撤销上一框</button>
+            <button class="secondary" id="visualClearPage" type="button">清空本页</button>
+          </div>
+          <p class="hint">在 PDF 页面上按住鼠标或手指拖拽画框。导出时会把黑框永久写入栅格化 PDF，不保留原文字层。</p>
+          <div class="visualCanvasWrap"><canvas id="visualRedactCanvas"></canvas></div>
+          <p class="hint" id="visualRedactCount">已画 0 个涂黑框。</p>
+        `;
+        settings.after(editor);
+
+        const canvas = $("#visualRedactCanvas");
+        const ctx = canvas.getContext("2d", { alpha: false });
+        const pageLabel = $("#visualPageLabel");
+        const countLabel = $("#visualRedactCount");
+        const option = Array.from(tool.options).find((item) => item.value === "redact");
+        if (option) option.textContent = "PDF 可视化涂黑";
+
+        let currentFiles = [];
+        const state = {
+          doc: null,
+          file: null,
+          pageNumber: 1,
+          pageCount: 0,
+          rects: {},
+          drawing: null,
+          baseImage: null,
+          renderToken: 0,
+        };
+
+        function resetRedact() {
+          state.doc = null;
+          state.file = null;
+          state.pageNumber = 1;
+          state.pageCount = 0;
+          state.rects = {};
+          state.drawing = null;
+          state.baseImage = null;
+          state.renderToken += 1;
+          canvas.width = 1;
+          canvas.height = 1;
+          countLabel.textContent = "已画 0 个涂黑框。";
+          editor.classList.remove("active");
+        }
+
+        function filesForRedact() {
+          return currentFiles.length ? currentFiles : Array.from(fileInput.files || []);
+        }
+
+        function pageRects(pageNumber = state.pageNumber) {
+          if (!state.rects[pageNumber]) state.rects[pageNumber] = [];
+          return state.rects[pageNumber];
+        }
+
+        function rectTotal() {
+          return Object.values(state.rects).reduce((sum, list) => sum + list.length, 0);
+        }
+
+        function point(event) {
+          const box = canvas.getBoundingClientRect();
+          return {
+            x: (event.clientX - box.left) * (canvas.width / box.width),
+            y: (event.clientY - box.top) * (canvas.height / box.height),
+          };
+        }
+
+        function normalize(start, end) {
+          const x = Math.max(0, Math.min(start.x, end.x));
+          const y = Math.max(0, Math.min(start.y, end.y));
+          const right = Math.min(canvas.width, Math.max(start.x, end.x));
+          const bottom = Math.min(canvas.height, Math.max(start.y, end.y));
+          return { x, y, width: right - x, height: bottom - y };
+        }
+
+        function drawRects() {
+          if (state.baseImage) ctx.putImageData(state.baseImage, 0, 0);
+          ctx.save();
+          pageRects().forEach((rect) => drawRect(rect, 0.88));
+          if (state.drawing) drawRect(normalize(state.drawing.start, state.drawing.current), 0.54);
+          ctx.restore();
+          countLabel.textContent = `已画 ${rectTotal()} 个涂黑框。`;
+        }
+
+        function drawRect(rect, opacity) {
+          ctx.fillStyle = `rgba(0,0,0,${opacity})`;
+          ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+          ctx.strokeStyle = "#0e6f5c";
+          ctx.lineWidth = 3;
+          ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+        }
+
+        async function renderPage() {
+          if (!state.doc) return;
+          const token = ++state.renderToken;
+          const page = await state.doc.getPage(state.pageNumber);
+          const viewport = page.getViewport({ scale: 2 });
+          canvas.width = Math.ceil(viewport.width);
+          canvas.height = Math.ceil(viewport.height);
+          ctx.fillStyle = "#fff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          await page.render({ canvasContext: ctx, viewport }).promise;
+          if (token !== state.renderToken) return;
+          state.baseImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          pageLabel.textContent = `第 ${state.pageNumber} 页 / 共 ${state.pageCount} 页`;
+          drawRects();
+        }
+
+        async function prepare() {
+          if (tool.value !== "redact") return;
+          const files = filesForRedact();
+          if (files.length !== 1) {
+            editor.classList.remove("active");
+            return;
+          }
+          const file = files[0];
+          if (state.file === file && state.doc) {
+            editor.classList.add("active");
+            await renderPage();
+            return;
+          }
+          resetRedact();
+          editor.classList.add("active");
+          pageLabel.textContent = "正在载入 PDF";
+          const pdf = await win.pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+          state.doc = pdf;
+          state.file = file;
+          state.pageCount = pdf.numPages;
+          state.pageNumber = 1;
+          await renderPage();
+        }
+
+        function setProgress(value, text) {
+          progress.classList.add("active");
+          progressBar.style.width = `${value}%`;
+          progressNumber.textContent = `${value}%`;
+          progressText.textContent = text;
+        }
+
+        function formatBytes(bytes) {
+          if (bytes < 1024) return `${bytes} B`;
+          if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+          return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+        }
+
+        function addResult(name, bytes) {
+          const blob = new Blob([bytes], { type: "application/pdf" });
+          const url = URL.createObjectURL(blob);
+          const item = doc.createElement("div");
+          item.className = "resultItem";
+          item.innerHTML = `<div><strong>${name}</strong><small>${formatBytes(blob.size)}</small></div>`;
+          const link = doc.createElement("a");
+          link.className = "download";
+          link.href = url;
+          link.download = name;
+          link.textContent = "下载";
+          item.append(link);
+          results.append(item);
+        }
+
+        async function exportRedacted() {
+          results.innerHTML = "";
+          const files = filesForRedact();
+          if (files.length !== 1) throw new Error("可视化涂黑一次请选择 1 个 PDF。");
+          if (!rectTotal()) throw new Error("请先在 PDF 页面上拖拽画出至少 1 个涂黑框。");
+          const src = await win.pdfjsLib.getDocument({ data: await files[0].arrayBuffer() }).promise;
+          const out = await win.PDFLib.PDFDocument.create();
+          for (let pageNum = 1; pageNum <= src.numPages; pageNum++) {
+            setProgress(Math.round((pageNum / src.numPages) * 85), `正在写入第 ${pageNum} / ${src.numPages} 页涂黑区域`);
+            const page = await src.getPage(pageNum);
+            const viewport = page.getViewport({ scale: 2 });
+            const pageCanvas = doc.createElement("canvas");
+            pageCanvas.width = Math.ceil(viewport.width);
+            pageCanvas.height = Math.ceil(viewport.height);
+            const pageCtx = pageCanvas.getContext("2d", { alpha: false });
+            await page.render({ canvasContext: pageCtx, viewport }).promise;
+            pageCtx.fillStyle = "#000";
+            (state.rects[pageNum] || []).forEach((rect) => {
+              pageCtx.fillRect(rect.x, rect.y, rect.width, rect.height);
+            });
+            const pngBytes = await new Promise((resolve) => {
+              pageCanvas.toBlob(async (blob) => resolve(new Uint8Array(await blob.arrayBuffer())), "image/png");
+            });
+            const image = await out.embedPng(pngBytes);
+            const outPage = out.addPage([viewport.width / 2, viewport.height / 2]);
+            outPage.drawImage(image, { x: 0, y: 0, width: viewport.width / 2, height: viewport.height / 2 });
+          }
+          addResult("redacted-visual-raster.pdf", await out.save({ useObjectStreams: true }));
+          setProgress(100, "处理完成，未上传服务器");
+        }
+
+        function sync() {
+          if (tool.value !== "redact") {
+            editor.classList.remove("active");
+            runBtn.textContent = "开始处理";
+            return;
+          }
+          if (notice) {
+            notice.textContent = "已实现：选择 1 个 PDF 后直接在页面上拖拽画框，导出时永久涂黑并栅格化。";
+            notice.className = "notice";
+          }
+          if (oldRedactWrap) oldRedactWrap.style.display = "none";
+          if (rangeWrap) rangeWrap.style.display = "none";
+          if (watermarkWrap) watermarkWrap.style.display = "none";
+          if (angleWrap) angleWrap.style.display = "none";
+          if (settings) settings.classList.remove("wide");
+          runBtn.textContent = "导出涂黑 PDF";
+          prepare().catch(showError);
+        }
+
+        function showError(error) {
+          results.innerHTML = `<div class="notice bad">${error.message}</div>`;
+        }
+
+        fileInput.addEventListener("change", () => {
+          currentFiles = Array.from(fileInput.files || []);
+          resetRedact();
+          setTimeout(sync, 0);
+        });
+        drop.addEventListener("drop", (event) => {
+          currentFiles = Array.from(event.dataTransfer.files || []);
+          resetRedact();
+          setTimeout(sync, 0);
+        });
+        tool.addEventListener("change", () => setTimeout(sync, 0));
+        clearBtn.addEventListener("click", resetRedact);
+        runBtn.addEventListener("click", (event) => {
+          if (tool.value !== "redact") return;
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          exportRedacted().catch((error) => {
+            setProgress(100, "处理停止");
+            showError(error);
+          });
+        }, true);
+
+        canvas.addEventListener("pointerdown", (event) => {
+          if (tool.value !== "redact" || !state.doc) return;
+          event.preventDefault();
+          canvas.setPointerCapture(event.pointerId);
+          const p = point(event);
+          state.drawing = { start: p, current: p };
+          drawRects();
+        });
+        canvas.addEventListener("pointermove", (event) => {
+          if (!state.drawing) return;
+          event.preventDefault();
+          state.drawing.current = point(event);
+          drawRects();
+        });
+        canvas.addEventListener("pointerup", (event) => {
+          if (!state.drawing) return;
+          event.preventDefault();
+          const rect = normalize(state.drawing.start, point(event));
+          state.drawing = null;
+          if (rect.width > 8 && rect.height > 8) pageRects().push(rect);
+          drawRects();
+        });
+        canvas.addEventListener("pointercancel", () => {
+          state.drawing = null;
+          drawRects();
+        });
+        $("#visualPrevPage").addEventListener("click", () => {
+          if (!state.doc || state.pageNumber <= 1) return;
+          state.pageNumber -= 1;
+          renderPage();
+        });
+        $("#visualNextPage").addEventListener("click", () => {
+          if (!state.doc || state.pageNumber >= state.pageCount) return;
+          state.pageNumber += 1;
+          renderPage();
+        });
+        $("#visualUndo").addEventListener("click", () => {
+          pageRects().pop();
+          drawRects();
+        });
+        $("#visualClearPage").addEventListener("click", () => {
+          state.rects[state.pageNumber] = [];
+          drawRects();
+        });
+
+        sync();
+      });
+
+      function injectStyle(doc) {
+        const style = doc.createElement("style");
+        style.textContent = `
+          .visualRedactEditor{display:none;gap:12px;border:1px solid #d9e4df;border-radius:8px;padding:12px;background:#f9fbfa}
+          .visualRedactEditor.active{display:grid}
+          .visualRedactToolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+          .visualRedactToolbar strong{color:#101815}
+          .visualCanvasWrap{max-height:680px;overflow:auto;border:1px solid #d9e4df;border-radius:8px;background:#dfe8e4}
+          #visualRedactCanvas{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair;background:white}
+          @media(max-width:680px){.visualRedactToolbar{align-items:stretch;flex-direction:column}}
+        `;
+        doc.head.append(style);
+      }
+    </script>
+  </body>
+</html>
